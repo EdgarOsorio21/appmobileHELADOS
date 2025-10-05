@@ -1,14 +1,14 @@
-import { useAuth } from "@clerk/clerk-expo";
 import { Redirect, Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { COLORS } from "../../constants/colors";
+import { useAuth } from "@/contexts/AuthContext";
+import { COLORS } from "@/constants/colors";
 
 const TabsLayout = () => {
-  const { isSignedIn, isLoaded } = useAuth();
+  const { user, loading } = useAuth();
 
-  if (!isLoaded) return null;
+  if (loading) return null;
 
-  if (!isSignedIn) return <Redirect href={"/(auth)/sign-in"} />;
+  if (!user) return <Redirect href="/(auth)/login" />;
 
   return (
     <Tabs
@@ -33,22 +33,30 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Recipes",
+          title: "Inicio",
+          tabBarIcon: ({ color, size }) => <Ionicons name="ice-cream" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="menu"
+        options={{
+          title: "Carta",
           tabBarIcon: ({ color, size }) => <Ionicons name="restaurant" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="search"
+        name="cart"
         options={{
-          title: "Search",
-          tabBarIcon: ({ color, size }) => <Ionicons name="search" size={size} color={color} />,
+          title: "Carrito",
+          tabBarIcon: ({ color, size }) => <Ionicons name="cart" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="favorites"
+        name="admin"
         options={{
-          title: "Favorites",
-          tabBarIcon: ({ color, size }) => <Ionicons name="heart" size={size} color={color} />,
+          href: user.role === "admin" ? undefined : null,
+          title: "Admin",
+          tabBarIcon: ({ color, size }) => <Ionicons name="settings" size={size} color={color} />,
         }}
       />
     </Tabs>
