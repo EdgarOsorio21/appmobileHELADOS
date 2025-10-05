@@ -1,50 +1,46 @@
-# Welcome to your Expo app 👋
+# Helados Aurora Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicación móvil construida con React Native + Expo para la heladería Helados Aurora. Permite a los clientes explorar el catálogo, administrar su carrito y revisar pedidos, mientras que los administradores supervisan órdenes e inventario.
 
-## Get started
+## Características principales
 
-1. Install dependencies
+- Registro, inicio/cierre de sesión con JWT almacenado en `expo-secure-store`.
+- Navegación con Expo Router y tabs personalizadas.
+- Catálogo dinámico conectado al backend Express.
+- Carrito sincronizado con la API y flujo de checkout.
+- Panel administrativo (solo usuarios `admin`) para pedidos e inventario.
+
+## Configuración
+
+1. Instala dependencias:
 
    ```bash
    npm install
    ```
 
-2. Start the app
+2. Crea un archivo `.env` o usa variables de entorno Expo:
+
+   ```bash
+   EXPO_PUBLIC_API_URL=http://localhost:5001/api
+   ```
+
+3. Ejecuta el proyecto:
 
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+## Estructura destacada
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- `app/_layout.jsx`: envuelve la app con los contextos de autenticación y carrito.
+- `app/(auth)`: pantallas de acceso (`login` y `register`).
+- `app/(tabs)`: navegación principal (Inicio, Carta, Carrito, Admin).
+- `contexts/AuthContext.jsx`: maneja sesión, registro y perfil.
+- `contexts/CartContext.jsx`: gestiona estado y acciones del carrito.
+- `services/api.js`: cliente HTTP centralizado para la API de Express.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Notas
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- El color principal y acentos están definidos en `constants/colors.js`.
+- La mayoría de los componentes antiguos de recetas se eliminaron para simplificar la base de código.
+- Para habilitar el panel admin, asigna el rol `admin` a un usuario desde la base de datos.

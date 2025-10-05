@@ -1,7 +1,18 @@
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon } from "@neondatabase/serverless";
+import mysql from "mysql2/promise";
 import { ENV } from "./env.js";
-import * as schema from "../db/schema.js";
 
-const sql = neon(ENV.DATABASE_URL);
-export const db = drizzle(sql, { schema });
+export const pool = mysql.createPool({
+  host: ENV.DB_HOST,
+  port: ENV.DB_PORT,
+  user: ENV.DB_USER,
+  password: ENV.DB_PASSWORD,
+  database: ENV.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  namedPlaceholders: true,
+});
+
+export const query = async (sql, params = {}) => {
+  const [rows] = await pool.execute(sql, params);
+  return rows;
+};
