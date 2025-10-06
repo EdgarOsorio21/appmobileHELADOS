@@ -23,8 +23,13 @@ Crea un archivo `.env` con los siguientes valores:
 PORT=5001
 DB_HOST=localhost
 DB_PORT=3306
+<<<<<<< HEAD
 DB_USER=tu_usuario
 DB_PASSWORD=tu_password
+=======
+DB_USER=heladeria_bd
+DB_PASSWORD=1234
+>>>>>>> a822bae (Primer commit desde VS Code - ajustes y conexión API)
 DB_NAME=heladeria_db
 JWT_SECRET=tu_secreto_super_seguro
 NODE_ENV=development
