@@ -3,6 +3,7 @@ import { getActiveCart, getCartItems } from "../services/cartService.js";
 import {
   createOrderFromCart,
   getAllOrders,
+  getOrderById,
   getOrderItems,
   getOrdersForUser,
   updateOrderStatus,
@@ -25,10 +26,20 @@ export const checkout = async (req, res) => {
       return res.status(400).json({ message: "El carrito está vacío" });
     }
 
-    const orderId = await createOrderFromCart({ userId: req.user.id, cartId: cart.id, items });
-    const orderItems = await getOrderItems(orderId);
+    const { orderId, total } = await createOrderFromCart({ userId: req.user.id, cartId: cart.id, items });
+    const [orderItems, orderInfo] = await Promise.all([getOrderItems(orderId), getOrderById(orderId)]);
 
-    res.status(201).json({ orderId, items: orderItems });
+    res.status(201).json({
+      orderId,
+      total,
+      createdAt: orderInfo?.createdAt,
+      status: orderInfo?.status,
+      customer: {
+        name: orderInfo?.customerName,
+        email: orderInfo?.email,
+      },
+      items: orderItems,
+    });
   } catch (error) {
     console.error("Error al procesar checkout", error);
     res.status(500).json({ message: "Error interno del servidor" });

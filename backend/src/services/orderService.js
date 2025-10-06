@@ -31,13 +31,25 @@ export const createOrderFromCart = async ({ userId, cartId, items }) => {
 
     await connection.commit();
 
-    return orderId;
+    return { orderId, total };
   } catch (error) {
     await connection.rollback();
     throw error;
   } finally {
     connection.release();
   }
+};
+
+export const getOrderById = async (orderId) => {
+  const rows = await query(
+    `SELECT o.id, o.total, o.status, o.created_at AS createdAt, u.name AS customerName, u.email
+     FROM orders o
+     LEFT JOIN users u ON o.user_id = u.id
+     WHERE o.id = :orderId`,
+    { orderId }
+  );
+
+  return rows[0];
 };
 
 export const getOrdersForUser = async (userId) => {

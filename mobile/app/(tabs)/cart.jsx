@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,9 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Modal,
+  Pressable,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useCart } from "@/contexts/CartContext";
@@ -34,11 +37,34 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => (
   </View>
 );
 
+const formatCurrency = (value) => `$${Number(value || 0).toFixed(2)}`;
+
+const formatDate = (value) => {
+  if (!value) return "";
+  try {
+    return new Date(value).toLocaleString("es-MX", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return value;
+  }
+};
+
 export default function CartScreen() {
   const { items, totals, loading, updateItem, removeItem, checkout } = useCart();
   const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState(null);
+  const [receipt, setReceipt] = useState(null);
+
+  const sortedItems = useMemo(
+    () =>
+      [...items].sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" })),
+    [items]
+  );
 
   const handleIncrease = async (item) => {
     try {
@@ -77,9 +103,9 @@ export default function CartScreen() {
 
     try {
       setSubmitting(true);
-      setMessage(null);
+      setReceipt(null);
       const order = await checkout();
-      setMessage(`¡Pedido #${order.orderId} recibido! Te avisaremos cuando esté listo.`);
+      setReceipt(order);
     } catch (err) {
       Alert.alert("No pudimos procesar tu pedido", err.message || "Intenta de nuevo más tarde");
     } finally {
@@ -105,7 +131,7 @@ export default function CartScreen() {
       </View>
 
       <FlatList
-        data={items}
+        data={sortedItems}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
           <CartItem
@@ -122,13 +148,12 @@ export default function CartScreen() {
       <View style={styles.summary}>
         <View style={styles.summaryRow}>
           <Text style={styles.summaryLabel}>Subtotal</Text>
-          <Text style={styles.summaryValue}>${totals.subtotal.toFixed(2)}</Text>
+          <Text style={styles.summaryValue}>{formatCurrency(totals.subtotal)}</Text>
         </View>
         <View style={styles.summaryRow}>
           <Text style={styles.summaryLabel}>Total</Text>
-          <Text style={styles.summaryTotal}>${totals.total.toFixed(2)}</Text>
+          <Text style={styles.summaryTotal}>{formatCurrency(totals.total)}</Text>
         </View>
-        {message && <Text style={styles.success}>{message}</Text>}
         <TouchableOpacity style={styles.checkoutButton} onPress={handleCheckout} disabled={submitting}>
           {submitting ? (
             <ActivityIndicator color={COLORS.white} />
@@ -137,6 +162,61 @@ export default function CartScreen() {
           )}
         </TouchableOpacity>
       </View>
+
+      <Modal visible={Boolean(receipt)} animationType="slide" transparent onRequestClose={() => setReceipt(null)}>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <View>
+                <Text style={styles.receiptTitle}>Pedido confirmado</Text>
+                {receipt?.orderId && (
+                  <Text style={styles.receiptSubtitle}>#{receipt.orderId}</Text>
+                )}
+              </View>
+              <Pressable onPress={() => setReceipt(null)} accessibilityRole="button">
+                <Ionicons name="close" size={24} color={COLORS.text} />
+              </Pressable>
+            </View>
+            <ScrollView style={{ maxHeight: 320 }} contentContainerStyle={styles.receiptContent}>
+              <View style={styles.receiptRow}>
+                <Text style={styles.receiptLabel}>Cliente</Text>
+                <Text style={styles.receiptValue}>{user?.name || receipt?.customer?.name || "Invitado"}</Text>
+              </View>
+              <View style={styles.receiptRow}>
+                <Text style={styles.receiptLabel}>Correo</Text>
+                <Text style={styles.receiptValue}>{receipt?.customer?.email || "-"}</Text>
+              </View>
+              <View style={styles.receiptRow}>
+                <Text style={styles.receiptLabel}>Fecha</Text>
+                <Text style={styles.receiptValue}>{formatDate(receipt?.createdAt)}</Text>
+              </View>
+              <View style={styles.receiptDivider} />
+              <Text style={styles.receiptSectionTitle}>Resumen</Text>
+              {receipt?.items?.map((item) => (
+                <View key={item.id} style={styles.receiptItemRow}>
+                  <View>
+                    <Text style={styles.receiptItemName}>{item.name}</Text>
+                    <Text style={styles.receiptItemMeta}>
+                      {item.quantity} x {formatCurrency(item.unitPrice)}
+                    </Text>
+                  </View>
+                  <Text style={styles.receiptItemTotal}>
+                    {formatCurrency(Number(item.unitPrice) * item.quantity)}
+                  </Text>
+                </View>
+              ))}
+              <View style={styles.receiptDivider} />
+              <View style={styles.receiptTotalRow}>
+                <Text style={styles.receiptTotalLabel}>Total</Text>
+                <Text style={styles.receiptTotalValue}>{formatCurrency(receipt?.total)}</Text>
+              </View>
+            </ScrollView>
+            <TouchableOpacity style={styles.modalButton} onPress={() => setReceipt(null)}>
+              <Text style={styles.modalButtonText}>Listo</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -260,9 +340,104 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: COLORS.background,
   },
-  success: {
-    color: COLORS.success,
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(25, 16, 32, 0.35)",
+    justifyContent: "center",
+    padding: 24,
+  },
+  modalCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 24,
+    padding: 20,
+    gap: 16,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 12,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  receiptTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: COLORS.text,
+  },
+  receiptSubtitle: {
+    color: COLORS.primary,
+    fontWeight: "700",
+    marginTop: 2,
+  },
+  receiptContent: {
+    gap: 12,
+  },
+  receiptRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  receiptLabel: {
+    color: COLORS.textLight,
+    fontSize: 13,
+  },
+  receiptValue: {
+    color: COLORS.text,
     fontWeight: "600",
-    textAlign: "center",
+  },
+  receiptDivider: {
+    height: 1,
+    backgroundColor: COLORS.border,
+    marginVertical: 4,
+  },
+  receiptSectionTitle: {
+    fontWeight: "700",
+    color: COLORS.text,
+  },
+  receiptItemRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  receiptItemName: {
+    fontWeight: "600",
+    color: COLORS.text,
+  },
+  receiptItemMeta: {
+    color: COLORS.textLight,
+    fontSize: 12,
+  },
+  receiptItemTotal: {
+    fontWeight: "700",
+    color: COLORS.text,
+  },
+  receiptTotalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  receiptTotalLabel: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: COLORS.text,
+  },
+  receiptTotalValue: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: COLORS.primary,
+  },
+  modalButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  modalButtonText: {
+    color: COLORS.white,
+    fontWeight: "700",
+    fontSize: 16,
   },
 });

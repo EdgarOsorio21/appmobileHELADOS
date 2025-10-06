@@ -22,8 +22,12 @@ export const listCategories = async (req, res) => {
 
 export const listProducts = async (req, res) => {
   try {
-    const { categoryId, search } = req.query;
-    const products = await getProducts({ categoryId, search });
+    const { categoryId, search, includeInactive } = req.query;
+    const products = await getProducts({
+      categoryId,
+      search,
+      includeInactive: includeInactive === "true" || includeInactive === "1",
+    });
     res.json({ products });
   } catch (error) {
     console.error("Error obteniendo productos", error);
