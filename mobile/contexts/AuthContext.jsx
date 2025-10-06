@@ -4,6 +4,45 @@ import { authApi } from "@/services/api";
 
 const TOKEN_KEY = "heladeria_token";
 
+<<<<<<< HEAD
+=======
+async function secureStoreAvailable() {
+  try {
+    return await SecureStore.isAvailableAsync();
+  } catch {
+    return false;
+  }
+}
+
+const storage = {
+  getItem: async (key) => {
+    if (await secureStoreAvailable()) {
+      return SecureStore.getItemAsync(key);
+    }
+    if (typeof window !== "undefined" && window.localStorage) {
+      return window.localStorage.getItem(key);
+    }
+    return null;
+  },
+  setItem: async (key, value) => {
+    if (await secureStoreAvailable()) {
+      return SecureStore.setItemAsync(key, value);
+    }
+    if (typeof window !== "undefined" && window.localStorage) {
+      window.localStorage.setItem(key, value);
+    }
+  },
+  deleteItem: async (key) => {
+    if (await secureStoreAvailable()) {
+      return SecureStore.deleteItemAsync(key);
+    }
+    if (typeof window !== "undefined" && window.localStorage) {
+      window.localStorage.removeItem(key);
+    }
+  },
+};
+
+>>>>>>> a822bae (Primer commit desde VS Code - ajustes y conexión API)
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -15,7 +54,11 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const bootstrap = async () => {
       try {
+<<<<<<< HEAD
         const storedToken = await SecureStore.getItemAsync(TOKEN_KEY);
+=======
+        const storedToken = await storage.getItem(TOKEN_KEY);
+>>>>>>> a822bae (Primer commit desde VS Code - ajustes y conexión API)
         if (storedToken) {
           setToken(storedToken);
           const profile = await authApi.profile(storedToken);
@@ -23,23 +66,37 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (error) {
         console.warn("No se pudo restaurar la sesión", error?.message);
+<<<<<<< HEAD
         await SecureStore.deleteItemAsync(TOKEN_KEY);
+=======
+        await storage.deleteItem(TOKEN_KEY);
+>>>>>>> a822bae (Primer commit desde VS Code - ajustes y conexión API)
         setUser(null);
         setToken(null);
       } finally {
         setLoading(false);
       }
     };
+<<<<<<< HEAD
 
+=======
+>>>>>>> a822bae (Primer commit desde VS Code - ajustes y conexión API)
     bootstrap();
   }, []);
 
   const handleAuth = async (payload, mode) => {
     setAuthenticating(true);
     try {
+<<<<<<< HEAD
       const response = mode === "register" ? await authApi.register(payload) : await authApi.login(payload);
       const nextToken = response.token;
       await SecureStore.setItemAsync(TOKEN_KEY, nextToken);
+=======
+      const response =
+        mode === "register" ? await authApi.register(payload) : await authApi.login(payload);
+      const nextToken = response.token;
+      await storage.setItem(TOKEN_KEY, nextToken);
+>>>>>>> a822bae (Primer commit desde VS Code - ajustes y conexión API)
       setToken(nextToken);
       setUser(response.user);
       return response.user;
@@ -48,6 +105,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+<<<<<<< HEAD
   const login = async ({ email, password }) => {
     return handleAuth({ email, password }, "login");
   };
@@ -55,11 +113,21 @@ export const AuthProvider = ({ children }) => {
   const register = async ({ name, email, password, phone }) => {
     return handleAuth({ name, email, password, phone }, "register");
   };
+=======
+  const login = ({ email, password }) => handleAuth({ email, password }, "login");
+
+  const register = ({ name, email, password, phone }) =>
+    handleAuth({ name, email, password, phone }, "register");
+>>>>>>> a822bae (Primer commit desde VS Code - ajustes y conexión API)
 
   const logout = async () => {
     setUser(null);
     setToken(null);
+<<<<<<< HEAD
     await SecureStore.deleteItemAsync(TOKEN_KEY);
+=======
+    await storage.deleteItem(TOKEN_KEY);
+>>>>>>> a822bae (Primer commit desde VS Code - ajustes y conexión API)
   };
 
   const refreshProfile = async () => {
@@ -70,6 +138,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const value = useMemo(
+<<<<<<< HEAD
     () => ({
       user,
       token,
@@ -80,6 +149,9 @@ export const AuthProvider = ({ children }) => {
       logout,
       refreshProfile,
     }),
+=======
+    () => ({ user, token, loading, authenticating, login, register, logout, refreshProfile }),
+>>>>>>> a822bae (Primer commit desde VS Code - ajustes y conexión API)
     [user, token, loading, authenticating]
   );
 
