@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -10,17 +10,17 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import { catalogApi } from "@/services/api";
+import { catalogApi, resolveImageUrl } from "@/services/api";
 import { COLORS } from "@/constants/colors";
 import { useCart } from "@/contexts/CartContext";
 import { useLocalSearchParams } from "expo-router";
 
 const fallbackProductImage = "https://images.unsplash.com/photo-1488900128323-21503983a07e?auto=format&fit=crop&w=600&q=60";
 
-const getProductImage = (imageUrl) =>
-  imageUrl && imageUrl.startsWith("http")
-    ? { uri: imageUrl }
-    : { uri: fallbackProductImage };
+const getProductImage = (imageUrl) => {
+  const resolved = resolveImageUrl(imageUrl);
+  return { uri: resolved || fallbackProductImage };
+};
 
 const ProductCard = ({ product, onAdd }) => (
   <View style={styles.productCard}>
@@ -53,46 +53,56 @@ export default function MenuScreen() {
   const [error, setError] = useState(null);
   const { addItem } = useCart();
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     const response = await catalogApi.categories();
     return response.categories || [];
-  };
+  }, []);
 
-  const fetchProducts = async (filters = {}) => {
+  const fetchProducts = useCallback(async (filters = {}) => {
     const response = await catalogApi.products(filters);
     return response.products || [];
-  };
+  }, []);
 
-  const loadData = async ({ withCategories = false, filters = {} } = {}) => {
-    setLoading(true);
-    setError(null);
-    try {
-      if (withCategories) {
-        const cats = await fetchCategories();
-        setCategories(cats);
+  const loadData = useCallback(
+    async ({ withCategories = false, filters = {} } = {}) => {
+      setLoading(true);
+      setError(null);
+      try {
+        if (withCategories) {
+          const cats = await fetchCategories();
+          setCategories(cats);
+        }
+        const prods = await fetchProducts(filters);
+        setProducts(prods);
+      } catch (err) {
+        setError(err.message || "No pudimos obtener la carta");
+      } finally {
+        setLoading(false);
       }
-      const prods = await fetchProducts(filters);
-      setProducts(prods);
-    } catch (err) {
-      setError(err.message || "No pudimos obtener la carta");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [fetchCategories, fetchProducts]
+  );
+
+  const hasLoadedOnce = useRef(false);
+  const latestSearchRef = useRef(search);
+
+  useEffect(() => {
+    latestSearchRef.current = search;
+  }, [search]);
 
   useEffect(() => {
     loadData({ withCategories: true, filters: { categoryId: defaultCategory } });
-  }, []);
+    hasLoadedOnce.current = true;
+  }, [defaultCategory, loadData]);
 
   useEffect(() => {
-    if (!loading) {
-      loadData({ filters: { categoryId: selectedCategory, search: search || undefined } });
-    }
-    }, [selectedCategory]);
+    if (!hasLoadedOnce.current) return;
+    loadData({ filters: { categoryId: selectedCategory, search: latestSearchRef.current || undefined } });
+  }, [selectedCategory, loadData]);
 
   const handleSearch = useCallback(async () => {
     await loadData({ filters: { categoryId: selectedCategory, search } });
-  }, [selectedCategory, search]);
+  }, [loadData, selectedCategory, search]);
 
   const handleAddToCart = async (productId) => {
     try {

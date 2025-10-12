@@ -2,6 +2,7 @@ import { Router } from "express";
 import { body, param } from "express-validator";
 import {
   checkout,
+  downloadReceipt,
   listAllOrders,
   listMyOrders,
   updateOrderStatusController,
@@ -12,6 +13,12 @@ const router = Router();
 
 router.post("/checkout", authenticate, checkout);
 router.get("/mine", authenticate, listMyOrders);
+
+router.get(
+  "/:orderId/receipt",
+  [authenticate, param("orderId").isInt({ min: 1 })],
+  downloadReceipt
+);
 
 router.get("/", authenticate, requireAdmin, listAllOrders);
 

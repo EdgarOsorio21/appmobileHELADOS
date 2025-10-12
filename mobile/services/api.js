@@ -1,4 +1,14 @@
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, "") || "http://localhost:5001/api";
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, "") || "http://localhost:5001/api";
+const API_ORIGIN = API_BASE_URL.replace(/\/api$/i, "");
+
+export const resolveImageUrl = (path) => {
+  if (!path) return null;
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+  const normalised = String(path).replace(/^\/+/, "");
+  return `${API_ORIGIN}/${normalised}`;
+};
 
 const createHeaders = (token) => {
   const headers = { "Content-Type": "application/json" };
