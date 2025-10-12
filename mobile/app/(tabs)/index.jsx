@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
-import { catalogApi, orderApi } from "@/services/api";
+import { catalogApi, orderApi, resolveImageUrl } from "@/services/api";
 import { COLORS } from "@/constants/colors";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,10 +11,10 @@ const heroImage = {
 };
 const fallbackProductImage = "https://images.unsplash.com/photo-1488900128323-21503983a07e?auto=format&fit=crop&w=600&q=60";
 
-const getProductImage = (imageUrl) =>
-  imageUrl && imageUrl.startsWith("http")
-    ? { uri: imageUrl }
-    : { uri: fallbackProductImage };
+const getProductImage = (imageUrl) => {
+  const resolved = resolveImageUrl(imageUrl);
+  return { uri: resolved || fallbackProductImage };
+};
 
 export default function HomeScreen() {
   const router = useRouter();

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { COLORS } from "@/constants/colors";
+import * as WebBrowser from "expo-web-browser";
+import { API_BASE_URL } from "@/services/api";
 
 const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => (
   <View style={styles.itemCard}>
@@ -36,9 +38,18 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => (
 
 export default function CartScreen() {
   const { items, totals, loading, updateItem, removeItem, checkout } = useCart();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState(null);
+  const [receiptPath, setReceiptPath] = useState(null);
+  const [openingReceipt, setOpeningReceipt] = useState(false);
+
+  useEffect(() => {
+    if (items.length) {
+      setMessage(null);
+      setReceiptPath(null);
+    }
+  }, [items.length]);
 
   const handleIncrease = async (item) => {
     try {
@@ -78,12 +89,36 @@ export default function CartScreen() {
     try {
       setSubmitting(true);
       setMessage(null);
+      setReceiptPath(null);
       const order = await checkout();
-      setMessage(`¡Pedido #${order.orderId} recibido! Te avisaremos cuando esté listo.`);
+      const totalAmount = Number(order?.totals?.total ?? totals.total);
+      setReceiptPath(order?.receipt?.url || null);
+      setMessage(
+        `¡Pedido #${order.orderId} recibido! Total $${totalAmount.toFixed(2)}. Descarga tu comprobante cuando quieras.`
+      );
     } catch (err) {
       Alert.alert("No pudimos procesar tu pedido", err.message || "Intenta de nuevo más tarde");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleOpenReceipt = async () => {
+    if (!receiptPath) return;
+    if (!token) {
+      Alert.alert("Inicia sesión", "Necesitas iniciar sesión para descargar tu comprobante.");
+      return;
+    }
+
+    try {
+      setOpeningReceipt(true);
+      const separator = receiptPath.includes("?") ? "&" : "?";
+      const url = `${API_BASE_URL}${receiptPath}${separator}token=${encodeURIComponent(token)}`;
+      await WebBrowser.openBrowserAsync(url);
+    } catch (err) {
+      Alert.alert("No se pudo abrir el comprobante", err.message || "Intenta nuevamente.");
+    } finally {
+      setOpeningReceipt(false);
     }
   };
 
@@ -129,6 +164,15 @@ export default function CartScreen() {
           <Text style={styles.summaryTotal}>${totals.total.toFixed(2)}</Text>
         </View>
         {message && <Text style={styles.success}>{message}</Text>}
+        {receiptPath && (
+          <TouchableOpacity style={styles.receiptButton} onPress={handleOpenReceipt} disabled={openingReceipt}>
+            {openingReceipt ? (
+              <ActivityIndicator color={COLORS.primary} />
+            ) : (
+              <Text style={styles.receiptButtonText}>Descargar comprobante</Text>
+            )}
+          </TouchableOpacity>
+        )}
         <TouchableOpacity style={styles.checkoutButton} onPress={handleCheckout} disabled={submitting}>
           {submitting ? (
             <ActivityIndicator color={COLORS.white} />
@@ -243,6 +287,20 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: "center",
     marginTop: 8,
+  },
+  receiptButton: {
+    borderWidth: 1.5,
+    borderColor: COLORS.primary,
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: "center",
+    marginTop: 8,
+    backgroundColor: COLORS.white,
+  },
+  receiptButtonText: {
+    color: COLORS.primary,
+    fontWeight: "700",
+    fontSize: 16,
   },
   checkoutText: {
     color: COLORS.white,

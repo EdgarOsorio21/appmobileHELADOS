@@ -61,6 +61,19 @@ export const getOrderItems = async (orderId) => {
   );
 };
 
+export const getOrderById = async (orderId) => {
+  const rows = await query(
+    `SELECT o.id, o.total, o.status, o.created_at AS createdAt, o.user_id AS userId,
+            u.name AS customerName, u.email AS customerEmail
+     FROM orders o
+     LEFT JOIN users u ON o.user_id = u.id
+     WHERE o.id = :orderId`,
+    { orderId }
+  );
+
+  return rows[0];
+};
+
 export const getAllOrders = async () => {
   return query(
     `SELECT o.id, o.total, o.status, o.created_at AS createdAt, u.name AS customerName, u.email

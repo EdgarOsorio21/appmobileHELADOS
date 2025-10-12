@@ -8,11 +8,7 @@ import {
   updateCartItemQuantity,
 } from "../services/cartService.js";
 import { getProductById } from "../services/productService.js";
-
-const calculateTotals = (items) => {
-  const subtotal = items.reduce((sum, item) => sum + item.quantity * Number(item.unitPrice), 0);
-  return { subtotal, total: subtotal };
-};
+import { calculateTotals } from "../utils/totals.js";
 
 const ensureCart = async (userId) => {
   let cart = await getActiveCart(userId);
