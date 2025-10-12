@@ -19,3 +19,11 @@ export const createUser = async ({ name, email, password, phone, role = "custome
   );
   return result.insertId;
 };
+
+export const listUsers = async () => {
+  return query(
+    `SELECT id, name, email, phone, role, created_at AS createdAt
+     FROM users
+     ORDER BY created_at DESC`
+  );
+};

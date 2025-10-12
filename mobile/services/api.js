@@ -67,6 +67,7 @@ export const catalogApi = {
   product: (id) => request(`/products/${id}`),
   createProduct: (token, payload) => request("/products", { method: "POST", token, body: payload }),
   updateProduct: (token, id, payload) => request(`/products/${id}`, { method: "PUT", token, body: payload }),
+  deleteProduct: (token, id) => request(`/products/${id}`, { method: "DELETE", token }),
   createCategory: (token, payload) => request("/categories", { method: "POST", token, body: payload }),
   updateCategory: (token, id, payload) => request(`/categories/${id}`, { method: "PUT", token, body: payload }),
 };
@@ -85,4 +86,9 @@ export const orderApi = {
   allOrders: (token) => request("/orders", { token }),
   updateStatus: (token, orderId, status) =>
     request(`/orders/${orderId}/status`, { method: "PATCH", token, body: { status } }),
+};
+
+export const adminApi = {
+  dashboard: (token) => request("/admin/dashboard", { token }),
+  users: (token) => request("/admin/users", { token }),
 };
