@@ -29,7 +29,7 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <Text style={styles.title}>Bienvenido a Helados Aurora</Text>
+        <Text style={styles.title}>Bienvenido a Helados Victoria</Text>
         <Text style={styles.subtitle}>Inicia sesión para ordenar tus sabores favoritos</Text>
 
         <Text style={styles.label}>Correo electrónico</Text>
