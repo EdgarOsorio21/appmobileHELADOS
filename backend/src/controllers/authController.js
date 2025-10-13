@@ -1,8 +1,12 @@
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
 import { ENV } from "../config/env.js";
-import { createUser, findUserByEmail, findUserById } from "../services/userService.js";
+import {
+  createUser,
+  findUserByEmail,
+  findUserById,
+  verifyUserPassword,
+} from "../services/userService.js";
 
 const generateToken = (user) =>
   jwt.sign({ id: user.id, email: user.email, role: user.role, name: user.name }, ENV.JWT_SECRET, {
@@ -48,12 +52,12 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+    const isPasswordValid = await verifyUserPassword(user, password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
-    const token = generateToken(user);
+    const token = generateToken({ ...user, password_hash: undefined });
     const { password_hash, ...safeUser } = user;
 
     res.json({ user: safeUser, token });

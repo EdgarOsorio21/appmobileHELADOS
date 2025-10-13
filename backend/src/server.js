@@ -7,6 +7,7 @@ import productRoutes from "./routes/productRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import { ensureAdminUser } from "./services/userService.js";
 
 const app = express();
 
@@ -32,6 +33,19 @@ const startServer = async () => {
   try {
     await pool.query("SELECT 1");
     console.log("✅ Conexión a MySQL establecida correctamente");
+    if (ENV.ADMIN_EMAIL && ENV.ADMIN_PASSWORD) {
+      await ensureAdminUser({
+        name: ENV.ADMIN_NAME,
+        email: ENV.ADMIN_EMAIL,
+        password: ENV.ADMIN_PASSWORD,
+        phone: ENV.ADMIN_PHONE,
+      });
+      console.log(`👤 Cuenta administrativa lista (${ENV.ADMIN_EMAIL})`);
+    } else {
+      console.warn(
+        "⚠️ Variables ADMIN_EMAIL y ADMIN_PASSWORD no configuradas. No se creó un administrador por defecto."
+      );
+    }
   } catch (error) {
     console.error("❌ No se pudo conectar a la base de datos", error.message);
     process.exit(1);
