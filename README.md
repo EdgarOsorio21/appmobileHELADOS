@@ -28,7 +28,14 @@ DB_PASSWORD=tu_password
 DB_NAME=heladeria_db
 JWT_SECRET=tu_secreto_super_seguro
 NODE_ENV=development
+ADMIN_EMAIL=admin@helados.com
+ADMIN_PASSWORD=una_contraseña_segura
+# Opcionalmente personaliza el nombre y teléfono del administrador
+# ADMIN_NAME=Helados Admin
+# ADMIN_PHONE=5551234567
 ```
+
+Al iniciar el servidor, si `ADMIN_EMAIL` y `ADMIN_PASSWORD` están definidos se creará (o actualizará) automáticamente una cuenta administrativa con esas credenciales.
 
 ### Mobile (`/mobile`)
 

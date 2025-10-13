@@ -9,4 +9,8 @@ export const ENV = {
   DB_NAME: process.env.DB_NAME || "heladeria_db",
   JWT_SECRET: process.env.JWT_SECRET || "super-secret-heladeria",
   NODE_ENV: process.env.NODE_ENV,
+  ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+  ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
+  ADMIN_NAME: process.env.ADMIN_NAME,
+  ADMIN_PHONE: process.env.ADMIN_PHONE,
 };
