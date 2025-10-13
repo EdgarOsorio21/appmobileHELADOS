@@ -1,19 +1,46 @@
-import { Redirect, Tabs } from "expo-router";
+import { Redirect, Tabs, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { TouchableOpacity, Text, StyleSheet } from "react-native";
 import { useAuth } from "@/contexts/AuthContext";
 import { COLORS } from "@/constants/colors";
 
 const TabsLayout = () => {
-  const { user, loading } = useAuth();
+  const router = useRouter();
+  const { user, loading, logout } = useAuth();
 
   if (loading) return null;
 
   if (!user) return <Redirect href="/(auth)/login" />;
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.replace("/(auth)/login");
+    } catch (error) {
+      console.warn("No se pudo cerrar sesión", error?.message);
+    }
+  };
+
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        headerTitle: "Helados Victoria",
+        headerTitleAlign: "center",
+        headerStyle: {
+          backgroundColor: COLORS.primary,
+        },
+        headerTintColor: COLORS.white,
+        headerTitleStyle: {
+          fontWeight: "800",
+          fontSize: 18,
+        },
+        headerRight: () => (
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+            <Ionicons name="log-out-outline" size={20} color={COLORS.white} />
+            <Text style={styles.logoutText}>Cerrar sesión</Text>
+          </TouchableOpacity>
+        ),
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.textLight,
         tabBarStyle: {
@@ -63,3 +90,18 @@ const TabsLayout = () => {
   );
 };
 export default TabsLayout;
+
+const styles = StyleSheet.create({
+  logoutButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  logoutText: {
+    color: COLORS.white,
+    fontWeight: "600",
+    fontSize: 14,
+    marginLeft: 6,
+  },
+});

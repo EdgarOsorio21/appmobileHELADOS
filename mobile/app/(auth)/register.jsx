@@ -34,7 +34,7 @@ export default function RegisterScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       <View style={styles.card}>
-        <Text style={styles.title}>Crea tu cuenta helada</Text>
+        <Text style={styles.title}>Únete a Helados Victoria</Text>
         <Text style={styles.subtitle}>Regístrate para gestionar tu carrito y recibir promociones</Text>
 
         <Text style={styles.label}>Nombre completo</Text>

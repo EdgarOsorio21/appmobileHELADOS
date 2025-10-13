@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { ENV } from "./config/env.js";
+import { pool } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
@@ -27,6 +28,18 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ message: "Error interno del servidor" });
 });
 
-app.listen(ENV.PORT, () => {
-  console.log(`Heladería API ejecutándose en el puerto ${ENV.PORT}`);
-});
+const startServer = async () => {
+  try {
+    await pool.query("SELECT 1");
+    console.log("✅ Conexión a MySQL establecida correctamente");
+  } catch (error) {
+    console.error("❌ No se pudo conectar a la base de datos", error.message);
+    process.exit(1);
+  }
+
+  app.listen(ENV.PORT, () => {
+    console.log(`Helados Victoria API ejecutándose en el puerto ${ENV.PORT}`);
+  });
+};
+
+startServer();

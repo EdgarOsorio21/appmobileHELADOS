@@ -73,7 +73,7 @@ export default function HomeScreen() {
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.hero}>
         <View style={styles.heroText}>
-          <Text style={styles.heroTag}>Heladería artesanal</Text>
+          <Text style={styles.heroTag}>Helados Victoria</Text>
           <Text style={styles.heroTitle}>Sabores hechos con amor mexicano</Text>
           <Text style={styles.heroSubtitle}>
             Descubre nuestras combinaciones de temporada, paletas artesanales y malteadas cremosas.

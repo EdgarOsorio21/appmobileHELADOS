@@ -1,8 +1,8 @@
-<h1 align="center">🍨 Helados Aurora — App móvil y API Express</h1>
+<h1 align="center">🍨 Helados Victoria — App móvil y API Express</h1>
 
 ![Demo App](/mobile/assets/images/screenshot-for-readme.png)
 
-Helados Aurora es una plataforma completa para administrar una heladería moderna:
+Helados Victoria es una plataforma completa para administrar una heladería moderna:
 
 - 👩‍🍳 Catálogo editable de helados, paletas y malteadas.
 - 🛒 Carrito persistente por usuario y flujo de checkout.
@@ -23,13 +23,8 @@ Crea un archivo `.env` con los siguientes valores:
 PORT=5001
 DB_HOST=localhost
 DB_PORT=3306
-<<<<<<< HEAD
 DB_USER=tu_usuario
 DB_PASSWORD=tu_password
-=======
-DB_USER=heladeria_bd
-DB_PASSWORD=1234
->>>>>>> a822bae (Primer commit desde VS Code - ajustes y conexión API)
 DB_NAME=heladeria_db
 JWT_SECRET=tu_secreto_super_seguro
 NODE_ENV=development
@@ -107,4 +102,4 @@ Abre el enlace en Expo Go o en un emulador para probar la experiencia móvil.
 - Gestión avanzada de inventario (promociones, cupones).
 - Notificaciones push cuando un pedido cambie de estado.
 
-¡Disfruta creando experiencias dulces con Helados Aurora! 🍧
+¡Disfruta creando experiencias dulces con Helados Victoria! 🍧

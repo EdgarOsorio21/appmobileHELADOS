@@ -1,6 +1,6 @@
-# Helados Aurora Mobile
+# Helados Victoria Mobile
 
-Aplicación móvil construida con React Native + Expo para la heladería Helados Aurora. Permite a los clientes explorar el catálogo, administrar su carrito y revisar pedidos, mientras que los administradores supervisan órdenes e inventario.
+Aplicación móvil construida con React Native + Expo para la heladería Helados Victoria. Permite a los clientes explorar el catálogo, administrar su carrito y revisar pedidos, mientras que los administradores supervisan órdenes e inventario.
 
 ## Características principales
 
